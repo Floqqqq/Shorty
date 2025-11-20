@@ -51,32 +51,37 @@ Shorty — это полнофункциональный сервис по со�
 {
   "url": "https://example.com"
 }
-
+```
 Получить статистику
-
+```
 GET /api/v1/stats/:code
-
+```
 Получить историю всех ссылок
-
+```
 GET /api/v1/urls
-
+```
 Редирект по короткому коду
-
+```
 GET /:code
-
+```
 ---
 
 Запуск проекта через Docker
 
 Убедитесь, что Docker и Docker Compose установлены.
 
-1️⃣ Клонировать репозиторий
-2️⃣ Запустить проект
+1. Клонировать репозиторий
+2. Запустить проект
+```
 docker-compose up -d --build
-3️⃣ Открыть приложение
-Frontend: http://localhost:3000
-Backend:  http://localhost:8080
-PostgreSQL: localhost:5432
+```
+3. Открыть приложение
+   
+Frontend: ```http://localhost:3000```
+
+Backend:  ```http://localhost:8080```
+
+PostgreSQL: ```localhost:5432```
 
 ---
 
@@ -85,11 +90,17 @@ PostgreSQL: localhost:5432
 Если нужно полностью очистить историю:
 
 1. Остановить контейнеры
-- docker-compose down
-2. Удалить volume PostgreSQL
-- docker volume rm shorty_pgdata
-3. Запустить заново
--docker-compose up -d --build
+```
+docker-compose down
+```
+3. Удалить volume PostgreSQL
+```
+docker volume rm shorty_pgdata
+```
+5. Запустить заново
+```
+docker-compose up -d --build
+```
 
 История ссылок будет полностью пустой.
 
