@@ -1,0 +1,71 @@
+# ============================
+# GLOBAL
+# ============================
+.DS_Store
+*.log
+*.tmp
+*.cache
+
+# ============================
+# DOCKER
+# ============================
+/pgdata/
+/postgres-data/
+docker-data/
+*.pid
+
+# ============================
+# ENV FILES
+# ============================
+*.env
+*.env.*
+!backend/.env.example
+
+# ============================
+# GO BACKEND
+# ============================
+/backend/bin/
+/backend/tmp/
+/backend/dist/
+
+# Go build output
+/backend/*.exe
+/backend/*.exe~
+/backend/*.dll
+/backend/*.so
+/backend/*.dylib
+/backend/*.test
+
+# Go modules
+/backend/vendor/
+
+# IDE settings
+/backend/.idea/
+/backend/.vscode/
+
+# ============================
+# FRONTEND (React + Vite)
+# ============================
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.vite/
+
+# Local environment
+/frontend/*.local
+/frontend/*.log
+
+# ============================
+# EDITORS / SYSTEM
+# ============================
+.vscode/
+.idea/
+*.sublime-workspace
+*.swp
+Thumbs.db
+
+# ============================
+# DATABASE DUMPS
+# ============================
+*.sql
+*.dump
+*.backup

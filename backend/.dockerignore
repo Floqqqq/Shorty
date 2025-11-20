@@ -1,0 +1,23 @@
+# Go build cache
+bin/
+tmp/
+dist/
+
+# Git
+.git
+.gitignore
+
+# Editor configs
+.vscode/
+.idea/
+
+# Logs
+*.log
+*.tmp
+
+# Environment files (кроме example)
+*.env
+!.env.example
+
+# OS junk
+.DS_Store
