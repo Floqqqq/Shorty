@@ -1,0 +1,71 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+
+}
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: aliceblue; /* Tailwind's gray-900 */
+  background-color: #2a2c2f;/* Tailwind's gray-100 */
+  display: flex;
+  align-content: center;
+}
+main{
+  margin-top: 100px;
+  z-index: 1;
+
+}
+ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0;
+}
+li {
+  word-break: break-all;
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+a {
+  color: #fff; /* Tailwind's blue-500 */
+  text-decoration: none;
+  max-width: 272px;
+  margin-right: 20px;
+  
+}
+a:hover {
+  opacity: 0.6;
+}
+.form-input{
+  width: 225px;
+  margin: 10px 0;
+}
+.square-pic {
+  position: absolute;
+  top: 64px;
+  right: -65px;
+  width: 568px;
+  height: 568px;
+  background-color: #2f80ed;
+  box-sizing: border-box;
+  z-index: -1;
+}
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotation {
+  animation: rotation 20s linear infinite;
+}
