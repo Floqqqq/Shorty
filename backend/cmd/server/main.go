@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -21,69 +20,100 @@ import (
 	"github.com/yourusername/shorty/internal/services"
 )
 
+type app struct {
+	cfg     *config.Config
+	handler *handlers.URLHandler
+	dbpool  interface{ Close() }
+}
+
 func main() {
-    // load env file if present (dev)
-    _ = godotenv.Load()
+	setupLogger()
 
-    // setup logger
-    zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-    log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+	application := mustBuildApp()
+	defer application.dbpool.Close()
 
-    cfg, err := config.LoadConfigFromEnv()
-    if err != nil {
-        log.Fatal().Err(err).Msg("load config")
-    }
+	router := buildRouter(application.handler, application.cfg)
+	server := newHTTPServer(application.cfg, router)
 
-    dbpool, err := database.NewPgxPool(cfg)
-    if err != nil {
-        log.Fatal().Err(err).Msg("connect db")
-    }
-    defer dbpool.Close()
+	runServer(server)
+	gracefulShutdown(server)
+}
+func setupLogger() {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+}
 
-    repo := repositories.NewPgUrlRepository(dbpool)
-    svc := services.NewURLService(repo, cfg)
-    h := handlers.NewUrlHandler(svc, cfg)
+func mustBuildApp() *app {
+	cfg, err := config.LoadConfigFromEnv()
+	if err != nil {
+		log.Fatal().Err(err).Msg("load config")
+	}
 
-    router := gin.New()
-    router.Use(gin.Recovery())
-    router.Use(handlers.ZerologMiddleware())
-    router.Use(handlers.CORSMiddleware(cfg))
-    
+	dbpool, err := database.NewPgxPool(cfg)
+	if err != nil {
+		log.Fatal().Err(err).Msg("connect db")
+	}
 
-    api := router.Group("/api/v1")
-    {
-        api.POST("/shorten", h.Shorten)
-        api.GET("/stats/:code", h.Stats)
-        api.GET("/urls", h.GetAll)
-    }
-    // redirect route
-    router.GET("/:code", h.Redirect)
-    
-    srv := &http.Server{
-        Addr:    fmt.Sprintf(":%s", cfg.Port),
-        Handler: router,
-        ReadTimeout:  10 * time.Second,
-        WriteTimeout: 10 * time.Second,
-        IdleTimeout:  30 * time.Second,
-    }
+	repo := repositories.NewPgURLRepository(dbpool)
+	svc := services.NewURLService(repo, cfg)
+	handler := handlers.NewURLHandler(svc, cfg)
 
-    // graceful shutdown
-    go func() {
-        log.Info().Msgf("server starting on %s", srv.Addr)
-        if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-            log.Fatal().Err(err).Msg("listen")
-        }
-    }()
+	return &app{
+		cfg:     cfg,
+		handler: handler,
+		dbpool:  dbpool,
+	}
+}
 
-    quit := make(chan os.Signal, 1)
-    signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-    <-quit
-    log.Info().Msg("shutting down server...")
+func buildRouter(handler *handlers.URLHandler, cfg *config.Config) *gin.Engine {
+	router := gin.New()
+	router.Use(gin.Recovery())
+	router.Use(handlers.ZerologMiddleware())
+	router.Use(handlers.CORSMiddleware(cfg))
 
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
-    if err := srv.Shutdown(ctx); err != nil {
-        log.Fatal().Err(err).Msg("server shutdown")
-    }
-    log.Info().Msg("server stopped")
+	api := router.Group("/api/v1")
+	{
+		api.POST("/shorten", handler.Shorten)
+		api.GET("/stats/:code", handler.Stats)
+		api.GET("/urls", handler.GetAll)
+	}
+
+	router.GET("/:code", handler.Redirect)
+
+	return router
+}
+
+func newHTTPServer(cfg *config.Config, router *gin.Engine) *http.Server {
+	return &http.Server{
+		Addr:         fmt.Sprintf(":%s", cfg.Port),
+		Handler:      router,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  30 * time.Second,
+	}
+}
+
+func runServer(srv *http.Server) {
+	go func() {
+		log.Info().Msgf("server starting on %s", srv.Addr)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal().Err(err).Msg("listen")
+		}
+	}()
+}
+func gracefulShutdown(srv *http.Server) {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Info().Msg("shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal().Err(err).Msg("server shutdown")
+	}
+
+	log.Info().Msg("server stopped")
 }

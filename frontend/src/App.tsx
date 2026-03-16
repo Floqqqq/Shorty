@@ -16,7 +16,7 @@ export default function App() {
     const res = await create(url);
     if (res) {
       setLast(res.short_url);
-      setHistory((prev) => [res.short_url, ...prev].slice(0, 20));
+      setHistory((prev: any) => [res.short_url, ...prev].slice(0, 20));
     }
   }
 
@@ -36,7 +36,7 @@ export default function App() {
         }}>Load Stats for Last</button>
       </div>
       <UrlStats stats={statsData} />
-      <HistoryList items={history} onSelect={(it)=>setLast(it)} />
+      <HistoryList items={history} onSelect={(it: React.SetStateAction<string | null>)=>setLast(it)} />
     </main>
   );
 }

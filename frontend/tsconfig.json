@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "NodeNext",
-    "moduleResolution": "Node16",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "jsx": "react-jsx",
     "esModuleInterop": true,
@@ -14,7 +14,6 @@
     "noEmit": true,
     "types": ["vite/client"],
     "skipLibCheck": true,
-    "ignoreDeprecations": "6.0"
   },
   "include": ["src", "vite.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]

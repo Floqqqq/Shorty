@@ -9,7 +9,9 @@ export default function HistoryList({ items, onSelect }: { items: string[]; onSe
         {items.map((it, i) => (
           <li key={i} className="flex justify-between items-center border p-2 rounded">
             <a href={it} target="_blank" rel="noreferrer" className="truncate">{it}</a>
-            <button onClick={()=>onSelect(it)} className="ml-2 px-2 py-1 border rounded">Select</button>
+            <button onClick={()=> {
+                onSelect(it)}}
+                className="ml-2 px-2 py-1 border rounded hover:bg-gray-100">Select</button>
           </li>
         ))}
       </ul>
