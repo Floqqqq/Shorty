@@ -70,8 +70,11 @@ func (s *URLService) Resolve(ctx context.Context, code string) (*models.URL, err
 	if err != nil {
 		return nil, err
 	}
-	// Увеличиваем клики
-	_ = s.repo.IncrementClicks(ctx, code)
+
+	if err := s.repo.IncrementClicks(ctx, code); err != nil {
+		return nil, err
+	}
+
 	u.Clicks++
 	return u, nil
 }
