@@ -1,7 +1,7 @@
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*@tailwind base;*/
+/*@tailwind components;*/
+/*@tailwind utilities;*/
 
 html, body, #root {
   height: 100%;
@@ -68,4 +68,7 @@ a:hover {
 
 .rotation {
   animation: rotation 20s linear infinite;
+}
+.header{
+
 }

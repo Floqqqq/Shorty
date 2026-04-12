@@ -31,7 +31,8 @@ func (m *mockRepo) Create(ctx context.Context, u *models.URL) error {
 
 func (m *mockRepo) GetByCode(ctx context.Context, code string) (*models.URL, error) {
 	if u, ok := m.store[code]; ok {
-		return u, nil
+		copyURL := *u
+		return &copyURL, nil
 	}
 	return nil, errors.New("not found")
 }

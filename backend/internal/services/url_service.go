@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 	"errors"
-
 	"net/url"
+	"strings"
 
 	"github.com/yourusername/shorty/internal/config"
 	"github.com/yourusername/shorty/internal/models"
@@ -40,6 +40,11 @@ func isValidURL(raw string) bool {
 	return err == nil && parsed.Scheme != "" && parsed.Host != ""
 }
 
+// Проверка ошибок уникальности
+func isUniqueViolation(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "unique")
+}
+
 // Создать короткую ссылку
 func (s *URLService) CreateShort(ctx context.Context, original string) (*models.URL, error) {
 	if !isValidURL(original) {
@@ -52,16 +57,16 @@ func (s *URLService) CreateShort(ctx context.Context, original string) (*models.
 
 	for {
 		u.ShortCode = generateShortCode(s.cfg.ShortCodeLength)
+
 		err := s.repo.Create(ctx, u)
 		if err != nil {
-			if err.Error() == "unique violation" {
-				continue // повторяем генерацию
+			if isUniqueViolation(err) {
+				continue
 			}
 			return nil, err
 		}
-		break
+		return u, nil
 	}
-	return u, nil
 }
 
 // Получить исходный URL по коду
@@ -85,7 +90,6 @@ func (s *URLService) GetStats(ctx context.Context, code string) (*models.URL, er
 }
 
 // Получить все ссылки
-
 func (s *URLService) GetAllURLs(ctx context.Context) ([]models.URL, error) {
 	return s.repo.GetAll(ctx)
 }
